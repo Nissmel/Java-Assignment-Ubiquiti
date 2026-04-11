@@ -37,6 +37,62 @@ Run tests only:
 - JUnit 5 for testing
 - In-memory storage (no database or additional configuration required)
 
+## Quick Start
+
+With the application running, register a sample network deployment:
+
+```bash
+# Gateway
+curl -X POST http://localhost:8443/api/devices -H "Content-Type: application/json" \
+  -d '{"deviceType":"GATEWAY","macAddress":"24:A4:3C:D3:E4:01"}'
+
+# Switches (connected to gateway)
+curl -X POST http://localhost:8443/api/devices -H "Content-Type: application/json" \
+  -d '{"deviceType":"SWITCH","macAddress":"FC:EC:DA:D3:E4:02","uplinkMacAddress":"24:A4:3C:D3:E4:01"}'
+
+curl -X POST http://localhost:8443/api/devices -H "Content-Type: application/json" \
+  -d '{"deviceType":"SWITCH","macAddress":"FC:EC:DA:D3:E4:03","uplinkMacAddress":"24:A4:3C:D3:E4:01"}'
+
+# Access Points (connected to switches)
+curl -X POST http://localhost:8443/api/devices -H "Content-Type: application/json" \
+  -d '{"deviceType":"ACCESS_POINT","macAddress":"78:8A:20:D3:E4:04","uplinkMacAddress":"FC:EC:DA:D3:E4:02"}'
+
+curl -X POST http://localhost:8443/api/devices -H "Content-Type: application/json" \
+  -d '{"deviceType":"ACCESS_POINT","macAddress":"78:8A:20:D3:E4:05","uplinkMacAddress":"FC:EC:DA:D3:E4:03"}'
+
+# Standalone Access Point (no uplink)
+curl -X POST http://localhost:8443/api/devices -H "Content-Type: application/json" \
+  -d '{"deviceType":"ACCESS_POINT","macAddress":"78:8A:20:D3:E4:06"}'
+```
+
+This creates the following network:
+
+```
+Gateway (24:A4:3C:D3:E4:01)
++-- Switch (FC:EC:DA:D3:E4:02)
+|   +-- Access Point (78:8A:20:D3:E4:04)
++-- Switch (FC:EC:DA:D3:E4:03)
+    +-- Access Point (78:8A:20:D3:E4:05)
+
+Access Point (78:8A:20:D3:E4:06)  [standalone]
+```
+
+Then query the API:
+
+```bash
+# All devices sorted by type
+curl http://localhost:8443/api/devices
+
+# Single device by MAC
+curl http://localhost:8443/api/devices/24:A4:3C:D3:E4:01
+
+# Full network topology
+curl http://localhost:8443/api/devices/topology
+
+# Topology from a specific device
+curl http://localhost:8443/api/devices/topology/FC:EC:DA:D3:E4:02
+```
+
 ## API Endpoints
 
 ### Register a device
